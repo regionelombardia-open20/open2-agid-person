@@ -22,4 +22,6 @@ return [
     '#agid_organizational_unit_5_id' => 'Organizational Unit 5',
     '#article_singular' => 'the',
     '#person' => 'person', 
+    "AgidPersonWorkflow/DRAFT" => "DRAFT",
+    "AgidPersonWorkflow/VALIDATED" => "PUBLISHED"
 ];

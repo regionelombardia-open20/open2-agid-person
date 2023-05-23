@@ -29,6 +29,7 @@ use yii\helpers\Url;
 use yii\web\JsExpression;
 use yii\web\View;
 use yii\widgets\ActiveForm as ActiveForm2;
+use open20\amos\attachments\components\CropInput;
 
 
 $js2 = <<<JS
@@ -277,20 +278,28 @@ $url = Url::to(['document-list']);
             </div>
 
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'photo')->widget(AttachmentsInput::classname(), [
-                    'options' => [
-                        'multiple' => false,
-                    ],
-                    'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
-                        'maxFileCount' => 1, // Client max files
-                        'showRemove' => true,
-                        'indicatorNew' => false,
-                        'allowedPreviewTypes' => ['image'],
-                        'previewFileIconSettings' => false,
-                        'overwriteInitial' => false,
-                        'layoutTemplates' => false
-                    ]
-                ])->label('Foto') ?>
+                <?php 
+                    // $form->field($model, 'photo')->widget(AttachmentsInput::classname(), [
+                    //     'options' => [
+                    //         'multiple' => false,
+                    //     ],
+                    //     'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
+                    //         'maxFileCount' => 1, // Client max files
+                    //         'showRemove' => true,
+                    //         'indicatorNew' => false,
+                    //         'allowedPreviewTypes' => ['image'],
+                    //         'previewFileIconSettings' => false,
+                    //         'overwriteInitial' => false,
+                    //         'layoutTemplates' => false
+                    //     ]
+                    // ])->label('Foto') 
+                ?>
+
+                <?= 
+                    $form->field($model, 'photo')->widget(CropInput::classname(), [
+                        'jcropOptions' => ['aspectRatio' => '1.7']
+                    ])
+                ?>
             </div>
         </div>
         <div class="col-xs-12">

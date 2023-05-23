@@ -42,4 +42,7 @@ return [
     '#organizational_unit_of_reference' => 'Organizzazione di riferimento',
     '#article_singular' => 'la',
     '#person' => 'persona', 
+    "AgidPersonWorkflow/DRAFT" => "BOZZA",
+    "AgidPersonWorkflow/VALIDATED" => "PUBBLICATO"
+
 ];
