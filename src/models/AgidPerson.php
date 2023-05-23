@@ -9,6 +9,9 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use open20\amos\seo\behaviors\SeoContentBehavior;
 use open20\agid\organizationalunit\models\AgidOrganizationalUnit;
+use open20\amos\core\interfaces\ViewModelInterface;
+use yii\helpers\Url;
+
 
 /**
  * This is the model class for table "agid_person".
@@ -18,6 +21,9 @@ use open20\agid\organizationalunit\models\AgidOrganizationalUnit;
  */
 class AgidPerson extends \open20\agid\person\models\base\AgidPerson
 {
+    public $useFrontendView = false;
+
+	    
     // Workflow ID
     const AGID_PERSON_WORKFLOW = 'AgidPersonWorkflow';
     // Workflow states IDS
@@ -190,8 +196,8 @@ class AgidPerson extends \open20\agid\person\models\base\AgidPerson
             ],
             'SeoContentBehavior' => [
                 'class' => SeoContentBehavior::className(),
-                'imageAttribute' => null,
-                'titleAttribute' => 'nomecognome',
+                'imageAttribute' => 'photo',
+                'titleAttribute' => 'name_surname',
                 'descriptionAttribute' => 'bio',
                 'defaultOgType' => 'person',
                 'schema' => 'Person'
@@ -199,6 +205,25 @@ class AgidPerson extends \open20\agid\person\models\base\AgidPerson
         ]);
     }
     
+    /**
+     * Metodo beforeSave for set column name_surname
+     *
+     * @param boolean $insert
+     * @return void
+     */
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        // set name_surname attribute
+        $this->name_surname = $this->getNomecognome();
+
+        return true;
+    }
+
+
     /**
      * @inheritdoc
      */
@@ -370,5 +395,64 @@ class AgidPerson extends \open20\agid\person\models\base\AgidPerson
     {
         return $this->name . ' ' . $this->surname;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getValidatedStatus()
+    {
+        return self::AGID_PERSON_STATUS_VALIDATED;
+    }
+
+    /**
+     * get model file for photo
+     *
+     * @return void
+     */
+    public function getPhoto(){
+
+        $photo = $this->hasOneFile('photo')->one();
+        return $photo;
+    }
+
+
+
+     /**
+     * @inheritdoc
+     */
+    public function getFullViewUrl()
+    {
+        if (!empty($this->usePrettyUrl) && ($this->usePrettyUrl == true)) {
+            return Url::toRoute(["/" . $this->getViewUrl() . "/" . $this->id . "/" . $this->getPrettyUrl()]);
+        } else if (
+                !empty($this->useFrontendView)
+                && ($this->useFrontendView == true)
+                && method_exists($this, 'getBackendobjectsUrl')
+            ) {
+            return \Yii::$app->params['platform']['frontendUrl'] . $this->getBackendobjectsUrl();
+        } else {
+            return $this->getBasicFullUrl($this->getViewUrl());
+        }
+    }
+
+    /**
+     *
+     * @return type
+     */
+    public function getFullFrontendViewUrl()
+    {
+        $url = $this->getFrontendViewUrl();
+        if (strpos($url, '{Id}')) {
+            $url = str_replace("{Id}", $this->id, $url);
+        }
+
+        if (strpos($url, '{Slug}')) {
+            $url = str_replace("{Slug}", $this->slug, $url);
+        }
+
+        return Url::toRoute(['/'.$url]);
+    }
+
+
 
 }

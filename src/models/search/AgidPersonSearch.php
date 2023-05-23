@@ -2,25 +2,26 @@
 
 namespace open20\agid\person\models\search;
 
-
-use open20\amos\core\interfaces\CmsModelInterface;
-use open20\amos\core\interfaces\ContentModelSearchInterface;
-use open20\amos\core\interfaces\SearchModelInterface;
-use open20\amos\core\record\CmsField;
-use open20\agid\person\models\AgidPerson;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use open20\agid\person\models\AgidPerson;
+use open20\amos\core\record\CmsField;
 use open20\amos\tag\models\EntitysTagsMm;
+use open20\agid\person\models\AgidPersonProfileType;
+use open20\amos\core\interfaces\CmsModelInterface;
+use open20\amos\core\interfaces\SearchModelInterface;
+use open20\amos\core\interfaces\ContentModelSearchInterface;
 
 /**
  * AgidPersonSearch represents the model behind the search form about `backend\modules\operators\models\AgidPerson`.
  */
-class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchModelInterface, ContentModelSearchInterface
+class AgidPersonSearch extends AgidPerson implements CmsModelInterface, SearchModelInterface, ContentModelSearchInterface
 {
     public $isSearch;
+    public $fullName;
 
-//private $container; 
+    //private $container; 
 
     public function __construct(array $config = [])
     {
@@ -31,10 +32,15 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
     public function rules()
     {
         return [
-            [['id', 'agid_person_content_type_id', 'agid_person_type_id', 'agid_document_cv_id', 'agid_document_import_id', 'agid_document_other_posts_id', 'agid_document_nomination_id', 'agid_document_balance_sheet_id', 'agid_document_tax_return_id', 'agid_document_election_expenses_id', 'agid_document_changes_balance_sheet_id', 'created_by', 'updated_by', 'deleted_by'], 'integer'],
-            [['name', 'surname', 'role', 'role_description', 'date_end_assignment', 'skills', 'delegation', 'date_start_settlement', 'bio', 'telephone', 'email', 'other_info', 'status', 'created_at', 'updated_at', 'deleted_at'], 'safe'],
+            [['id', 'agid_person_content_type_id', 'agid_person_type_id', 'agid_document_cv_id', 'agid_document_import_id',
+                'agid_document_other_posts_id', 'agid_document_nomination_id', 'agid_document_balance_sheet_id', 'agid_document_tax_return_id',
+                'agid_document_election_expenses_id', 'agid_document_changes_balance_sheet_id', 'created_by', 'updated_by',
+                'deleted_by'], 'integer'],
+            [['name', 'surname', 'role', 'role_description', 'date_end_assignment', 'skills', 'delegation', 'date_start_settlement',
+                'bio', 'telephone', 'email', 'other_info', 'status', 'created_at', 'updated_at', 'deleted_at'], 'safe'],
             ['AgidPersonContentType', 'safe'],
             ['AgidPersonType', 'safe'],
+            [['fullName'], 'safe']
         ];
     }
 
@@ -44,7 +50,7 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
         return Model::scenarios();
     }
 
-    public function search($params, $queryType = NULL, $limit = NULL, $onlyDrafts = false, $pageSize = NULL)
+    public function searchAgidPerson($params, $queryType = NULL, $limit = NULL, $onlyDrafts = false, $pageSize = NULL)
     {
         $query = AgidPerson::find();
 
@@ -54,7 +60,8 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
 
         $query->joinWith('agidPersonContentType');
         $query->joinWith('agidPersonType');
-        $query->distinct()->leftJoin(EntitysTagsMm::tableName(), EntitysTagsMm::tableName() . ".classname = '".  str_replace('\\','\\\\',AgidPerson::className()) . "' and ".EntitysTagsMm::tableName(). ".record_id = ". AgidPerson::tableName() . ".id and " . EntitysTagsMm::tableName(). ".deleted_at is NULL");  
+        $query->distinct()->leftJoin(EntitysTagsMm::tableName(),
+            EntitysTagsMm::tableName().".classname = '".str_replace('\\', '\\\\', AgidPerson::className())."' and ".EntitysTagsMm::tableName().".record_id = ".AgidPerson::tableName().".id and ".EntitysTagsMm::tableName().".deleted_at is NULL");
 
         $dataProvider->setSort([
             'attributes' => [
@@ -66,7 +73,7 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
                     'asc' => ['agid_person.surname' => SORT_ASC],
                     'desc' => ['agid_person.surname' => SORT_DESC],
                 ],
-            ]]);
+        ]]);
 
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
@@ -107,33 +114,33 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
             ->andFilterWhere(['like', 'agid_person.other_info', $this->other_info])
             ->andFilterWhere(['like', 'agid_person.status', $this->status]);
 
-            
-            // UPDATE FROM / TO 
-            $class_name = end(explode("\\", $this::className()));
 
-            if( !empty($params[$class_name]['updated_from']) ){
+        // UPDATE FROM / TO
+        $class_name = end(explode("\\", $this::className()));
 
-                $query->andWhere(['>=', 'agid_person.updated_at', $params[$class_name]['updated_from'] ]);
-            }
+        if (!empty($params[$class_name]['updated_from'])) {
 
-            if( !empty($params[$class_name]['updated_to']) ){
+            $query->andWhere(['>=', 'agid_person.updated_at', $params[$class_name]['updated_from']]);
+        }
 
-                $query->andWhere(['<=', 'agid_person.updated_at', $params[$class_name]['updated_to'] ]);
-            }
+        if (!empty($params[$class_name]['updated_to'])) {
 
-            // ORGANIZATIONAL UNIT OF REFERENCE
-            if( !empty($params[$class_name]['organizational_unit_of_reference']) ){
+            $query->andWhere(['<=', 'agid_person.updated_at', $params[$class_name]['updated_to']]);
+        }
 
-                $query->andWhere([ 'or',
-                            ['agid_organizational_unit_1_id' => $params[$class_name]['organizational_unit_of_reference']],
-                            ['agid_organizational_unit_2_id' => $params[$class_name]['organizational_unit_of_reference']],
-                            ['agid_organizational_unit_3_id' => $params[$class_name]['organizational_unit_of_reference']],
-                            ['agid_organizational_unit_4_id' => $params[$class_name]['organizational_unit_of_reference']],
-                            ['agid_organizational_unit_5_id' => $params[$class_name]['organizational_unit_of_reference']],
-                        ]);
-            }
+        // ORGANIZATIONAL UNIT OF REFERENCE
+        if (!empty($params[$class_name]['organizational_unit_of_reference'])) {
 
-            $dataProvider = $this->assignmentCompleted($params, $dataProvider);
+            $query->andWhere(['or',
+                ['agid_organizational_unit_1_id' => $params[$class_name]['organizational_unit_of_reference']],
+                ['agid_organizational_unit_2_id' => $params[$class_name]['organizational_unit_of_reference']],
+                ['agid_organizational_unit_3_id' => $params[$class_name]['organizational_unit_of_reference']],
+                ['agid_organizational_unit_4_id' => $params[$class_name]['organizational_unit_of_reference']],
+                ['agid_organizational_unit_5_id' => $params[$class_name]['organizational_unit_of_reference']],
+            ]);
+        }
+
+        $dataProvider = $this->assignmentCompleted($params, $dataProvider);
 
         return $dataProvider;
     }
@@ -147,29 +154,29 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
      * @param [dataProvider] $dataProvider
      * @return $dataProvider
      */
-    public function assignmentCompleted($params, $dataProvider){
+    public function assignmentCompleted($params, $dataProvider)
+    {
 
-        if( isset($params['AgidPersonSearch']['date_end_assignment']) ){
+        if (isset($params['AgidPersonSearch']['date_end_assignment'])) {
 
-            if( !empty($params['AgidPersonSearch']['date_end_assignment']) ){
+            if (!empty($params['AgidPersonSearch']['date_end_assignment'])) {
 
-                if( $params['AgidPersonSearch']['date_end_assignment'] == "si" ){
+                if ($params['AgidPersonSearch']['date_end_assignment'] == "si") {
 
                     $query = $dataProvider->query;
                     $query = $query->where(['IS NOT', 'date_end_assignment', null]);
 
                     $dataProvider = new ActiveDataProvider([
-                                            'query' => $query,
-                                        ]);
+                        'query' => $query,
+                    ]);
+                } elseif ($params['AgidPersonSearch']['date_end_assignment'] == 'no') {
 
-                }elseif ( $params['AgidPersonSearch']['date_end_assignment'] == 'no' ) {
-                    
                     $query = $dataProvider->query;
-                    $query = $query->where(['IS','date_end_assignment', null]);
+                    $query = $query->where(['IS', 'date_end_assignment', null]);
 
                     $dataProvider = new ActiveDataProvider([
-                                                'query' => $query,
-                                            ]);
+                        'query' => $query,
+                    ]);
                 }
             }
         }
@@ -177,19 +184,24 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
         return $dataProvider;
     }
 
-    public function cmsIsVisible($id) 
+    public function cmsIsVisible($id)
     {
         $retValue = true;
         return $retValue;
     }
 
-    public function cmsSearch($params, $limit) 
+    public function cmsSearch($params, $limit)
     {
-        $params = array_merge($params, Yii::$app->request->get());
+        $params       = array_merge($params, Yii::$app->request->get());
         $this->load($params);
-        $dataProvider  = $this->search($params);
-        $query = $dataProvider->query;
-        $i=0;
+        $dataProvider = $this->search($params);
+        $query        = $dataProvider->query;
+
+        $query->leftJoin(EntitysTagsMm::tableName(),
+                EntitysTagsMm::tableName().".classname = '".str_replace('\\', '\\\\', AgidPerson::className())."' and ".EntitysTagsMm::tableName().".record_id = ".AgidPerson::tableName().".id  and ".EntitysTagsMm::tableName().".deleted_at is NULL")
+            ->andWhere(['entitys_tags_mm.deleted_at' => null]);
+
+        $i = 0;
         foreach ($this->agid_person_type_id as $id) {
             if ($i == 0) {
                 $query->andFilterWhere(['like', 'agid_person_type_id', $id]);
@@ -204,12 +216,22 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
         } else {
             $query->limit($limit);
         }
-        $query->andWhere([AgidPerson::tableName().'.status' => AgidPerson::AGID_PERSON_STATUS_VALIDATED,]);
+        $query->andWhere([AgidPerson::tableName().'.status' => AgidPerson::AGID_PERSON_STATUS_VALIDATED]);
+
+        // filter by AgidPersonProfileType (Pubblico / Riservato)
+        if (!\Yii::$app->user->can('RUBRICA_INTERNA') || !\Yii::$app->user->can('ADMIN')) {
+            $query_agid_person_profile_type = AgidPersonProfileType::find()->select(['id'])->andWhere(['name' => 'Pubblico']);
+            $query->andWhere([AgidPerson::tableName().'.agid_person_profile_type_id' => $query_agid_person_profile_type]);
+        }
+
         if (!empty($params["conditionSearch"])) {
             $commands = explode(";", $params["conditionSearch"]);
             foreach ($commands as $command) {
                 $query->andWhere(eval("return ".$command.";"));
             }
+        }
+        if (empty($params['sort'])) {
+            $query->orderBy(new \yii\db\Expression("FIELD (role, 'Vicesindaco', 'Sindaco') DESC, agid_person.name ASC, agid_person.surname ASC"));
         }
         return $dataProvider;
     }
@@ -266,7 +288,7 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
     {
         return $this->search($params, "admin-all", $limit);
     }
-    
+
     /**
      * Method that searches all the news validated.
      *
@@ -316,18 +338,17 @@ class AgidPersonSearch extends AgidPerson implements  CmsModelInterface, SearchM
      */
     public function highlightedAndHomepageAgidPersonQuery($params)
     {
-        $now = date('Y-m-d');
+        $now       = date('Y-m-d');
         $tableName = $this->tableName();
-        
+
         $query = $this->baseSearch($params)
             ->andWhere([
-                $tableName . '.status' => AgidPerson::AGID_PERSON_STATUS_VALIDATED,
+                $tableName.'.status' => AgidPerson::AGID_PERSON_STATUS_VALIDATED,
             ])
             ->andWhere([
-                'deleted_at' => null
-            ]);
+            'deleted_at' => null
+        ]);
 
         return $query;
     }
-
 }

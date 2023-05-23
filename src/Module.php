@@ -30,6 +30,11 @@ class Module extends AmosModule implements ModuleInterface, SearchModuleInterfac
     public static $CONFIG_FOLDER = 'config';
 
     /**
+	 * @var array $defaultListViews This set the default order for the views in lists
+	 */
+	public $defaultListViews = ['list', 'grid'];
+
+    /**
      * @inheritdoc
      */
     public static function getModuleName()
@@ -136,7 +141,7 @@ class Module extends AmosModule implements ModuleInterface, SearchModuleInterfac
         $personTypeModel = $this->createModel('AgidPersonType');
         /** @var ActiveQuery $query */
         $query = $this->getValidatedPersons(true);
-        $query->andWhere(['agid_person_type_id' => $personTypeModel::POLITIC]);
+      //  $query->andWhere(['agid_person_type_id' => $personTypeModel::POLITIC]);
         if ($onlyQuery) {
             return $query;
         } else {

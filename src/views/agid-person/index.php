@@ -14,6 +14,8 @@ use open20\agid\person\Module;
 use yii\widgets\Pjax;
 use yii\data\ActiveDataProvider;
 use open20\amos\admin\models\base\UserProfile;
+use open20\agid\person\assets\PersonModuleAsset;
+$currentAsset = PersonModuleAsset::register($this);
 
 /**
  * @var yii\web\View $this
@@ -161,6 +163,9 @@ $exportColumns=[
 		DataProviderView::widget([
 			'dataProvider' => $dataProvider,
 			'currentView' => $currentView,
+            'listView' => [
+                'itemView' => '_itemCardAgidPerson'
+            ],
 			'gridView' => [
 				'columns' => [
 

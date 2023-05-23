@@ -9,6 +9,7 @@ use open20\agid\person\Module;
 use yii\db\ActiveQuery;
 use open20\agid\organizationalunit\models\AgidOrganizationalUnit;
 use yii\helpers\ArrayHelper;
+use open20\agid\person\models\AgidPersonProfileType;
 
 /**
  * This is the base-model class for table "agid_person".
@@ -62,7 +63,7 @@ use yii\helpers\ArrayHelper;
  * @property AgidPersonType $agidPersonType
  */
 abstract class AgidPerson extends \open20\amos\core\record\ContentModel implements \open20\amos\seo\interfaces\SeoModelInterface,
- \open20\amos\core\interfaces\ContentModelInterface
+\open20\amos\core\interfaces\ContentModelInterface, \open20\amos\core\interfaces\ViewModelInterface
 {
     public $isSearch = false;
     public $manager_org;
@@ -73,7 +74,7 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
     public $updated_from;
     public $updated_to;
     public $organizational_unit_of_reference;
-
+    public $fullName;
 
     /**
      * @inheritdoc
@@ -92,7 +93,7 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
             [['agid_person_content_type_id', 'agid_person_type_id', 'agid_document_cv_id', 'agid_document_import_id', 'agid_document_other_posts_id', 'agid_document_nomination_id', 'agid_document_balance_sheet_id', 'agid_document_tax_return_id', 'agid_document_election_expenses_id', 'agid_document_changes_balance_sheet_id', 'created_by', 'updated_by', 'deleted_by'], 'integer'],
             [['role_description', 'skills', 'delegation', 'bio', 'other_info', 'person_function'], 'string'],
             [['manager_org','date_end_assignment', 'date_start_settlement', 'created_at', 'updated_at', 'deleted_at','nomecognome'], 'safe'],
-            [['name', 'surname', 'role', 'email', 'status'], 'string', 'max' => 255],
+            [['name', 'surname', 'role', 'email', 'status', 'name_surname'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['telephone'], 'string',  'max' => 11],
             //[['telephone'], 'match', 'pattern' => '^[0-9]$'],
@@ -100,17 +101,21 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
             [['agid_person_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonType::className(), 'targetAttribute' => ['agid_person_type_id' => 'id']],
             [['photo'], 'file'],
             [['name', 'surname', 'role','agid_person_content_type_id', 'agid_person_type_id'], 'required'],
-
-
-            
             [['person_function_1', 'person_function_2', 'person_function_3', 'person_function_4', 'person_function_5'], 'string'],
             [['agid_organizational_unit_1_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
             [['agid_organizational_unit_2_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
             [['agid_organizational_unit_3_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
             [['agid_organizational_unit_4_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
             [['agid_organizational_unit_5_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
-            [['agid_organizational_unit_1_id', 'agid_organizational_unit_2_id', 'agid_organizational_unit_3_id', 'agid_organizational_unit_4_id', 'agid_organizational_unit_5_id'], 'integer']
-            
+            [['agid_organizational_unit_1_id', 'agid_organizational_unit_2_id', 'agid_organizational_unit_3_id', 'agid_organizational_unit_4_id', 'agid_organizational_unit_5_id'], 'integer'],
+            [['agid_person_profile_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonProfileType::className(), 'targetAttribute' => ['agid_person_profile_type_id' => 'id']], 
+            [['id_persona', 'telephone_internal_use', 'email_internal_use'], 'string', 'max' => 255],
+            [['email_internal_use'], 'email'],
+            [['priorita', 'agid_person_profile_type_id'], 'integer'],
+            [['priorita'], 'match' ,'pattern'=> '/^[0-9]+$/u'],
+            [['agid_person_profile_type_id'], 'required'],
+            [['notes_internal_use', 'service_status_internal_use', 'cellphone_internal_use'], 'string'],
+            [['fullName'], 'safe']
         ];
     }
 
@@ -121,6 +126,15 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
     {
         return [
             'id' => Module::t('amosperson', 'ID'),
+            'fullName' => Module::t('amosperson', 'Full Name'),
+            'service_status_internal_use' => Module::t('amosperson', 'Stato di servizio (a uso interno)'),
+            'notes_internal_use' => Module::t('amosperson', 'Note (a uso interno)'),
+            'telephone_internal_use' => Module::t('amosperson', 'Numero di telefono (a uso interno)'),
+            'email_internal_use' => Module::t('amosperson', 'Indirizzo email di servizio (a uso interno)'),
+            'cellphone_internal_use' => Module::t('amosperson', 'Cellulare di servizio (a uso interno)'),
+            'agid_person_profile_type_id' => Module::t('amosperson', 'Tipologia di profilo'),
+            'id_persona' => Module::t('amosperson', 'Id Persona'),
+            'priorita' => Module::t('amosperson', 'Priorità'),
             'agid_person_content_type_id' => Module::t('amosperson', 'Tipologia content type'),
             'reference_org' => Module::t('amosperson', 'Organizzazione di riferimento'),
             'photo' => Module::t('amosperson', 'Foto'),
@@ -508,4 +522,68 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
 
     }
 
+
+
+
+    /**
+     * Method to get all documents related to open20 \ amos \ documents \ models \ DocumentiConcilGroupsMm
+     * for AgidOrganizationalUnit present in AgidPerson 
+     * where AgidOrganizationalUnit name like "%group%"
+     *
+     * @return query
+     */
+    public function getAgidPersonDocumentiConcilGroups(){
+
+
+        $documenti_ids = ArrayHelper::getColumn(
+            \open20\amos\documenti\models\DocumentiConcilGroupsMm::find()
+                ->andWhere(['agid_organizational_unit_id' => 
+                                (AgidOrganizationalUnit::find()
+                                    ->select('id')
+                                    ->andWhere(
+                                        [
+                                            'id' => [
+                                                $this->agid_organizational_unit_1_id,
+                                                $this->agid_organizational_unit_2_id,
+                                                $this->agid_organizational_unit_3_id,
+                                                $this->agid_organizational_unit_4_id,
+                                                $this->agid_organizational_unit_5_id
+                                            ]
+                                        ])
+                                    ->andWhere(['status' => AgidOrganizationalUnit::AGID_ORGANIZATIONAL_UNIT_WORKFLOW_STATUS_VALIDATED])
+                                    ->andWhere(['deleted_at' => null])
+                                    ->andWhere(['LIKE', 'name', '%' . "grupp" . '%', false]))
+                ])
+                ->all(),
+
+            function ($element){
+                return $element->documenti_id;
+            }
+        );
+
+
+        return \open20\amos\documenti\models\Documenti::find()
+                ->andWhere(['id' => $documenti_ids])
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['in_evidenza' => 1])
+                ->andWhere(['primo_piano' => 1])
+                ->andWhere(['OR',
+                    ['data_rimozione' => null],
+                    ['>=', 'data_rimozione',  \Yii::$app->formatter->asDate('now', 'php:Y-m-d')]
+                ])
+                ->orderBy(['data_pubblicazione' => SORT_DESC]);
+        
+    }
+
+    
+    public function getFullName() {
+        return $this->surname . ' ' . $this->name;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAgidPersonProfileType(){
+        return $this->hasOne(AgidPersonProfileType::className(), ['id' => 'agid_person_profile_type_id']);
+    }
 }

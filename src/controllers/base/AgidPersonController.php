@@ -38,6 +38,8 @@ use yii\data\ActiveDataProvider;
 class AgidPersonController extends CrudController
 {
 
+    public $agidPersonModule;
+
     /**
      * @var string $layout
      */
@@ -45,22 +47,57 @@ class AgidPersonController extends CrudController
 
     public function init()
     {
+
+        
         $this->setModelObj(new AgidPerson());
         $this->setModelSearch(new AgidPersonSearch());
+
+        $this->agidPersonModule = \Yii::$app->getModule(Module::getModuleName());
 
         // default status of search model 
         $this->modelSearch->status = null;
 
-        $this->setAvailableViews([
+        // $this->setAvailableViews([
+        //     'grid' => [
+        //         'name' => 'grid',
+        //         'label' => AmosIcons::show('view-list-alt') . Html::tag('p', BaseAmosModule::tHtml('amoscore', 'Table')),
+        //         'url' => '?currentView=grid'
+        //     ],
+        //     'list' => [
+        //         'name' => 'list',
+        //         'label' => AmosIcons::show('view-list') . Html::tag('p', BaseAmosModule::t('amoscore', 'Card')),
+        //         'url' => '?currentView=list',
+        //     ]
+        // ]);
+
+        $availableViews = [
             'grid' => [
                 'name' => 'grid',
                 'label' => AmosIcons::show('view-list-alt') . Html::tag('p', BaseAmosModule::tHtml('amoscore', 'Table')),
                 'url' => '?currentView=grid'
-            ],
+            ]
+        ];
 
-        ]);
-        $this->setUpLayout();
+        
+        if (\Yii::$app->user->can('RUBRICA_INTERNA')) {
+
+            $availableViews = ArrayHelper::merge(
+                $availableViews,
+                [
+                    'list' => [
+                        'name' => 'list',
+                        'label' => AmosIcons::show('view-list') . Html::tag('p', BaseAmosModule::t('amoscore', 'Card')),
+                        'url' => '?currentView=list',
+                    ]
+                ]
+            );
+        }
+
+        $this->setAvailableViews($availableViews);
+
         parent::init();
+
+        $this->setUpLayout();
 
     }
 
@@ -107,12 +144,21 @@ class AgidPersonController extends CrudController
      * Lists all AgidPerson models.
      * @return mixed
      */
-    public function actionIndex($layout = NULL)
+    public function actionIndex($currentView = 'grid')
     {
         Url::remember();
+
+        if (empty($currentView)) {
+            $currentView = reset($this->agidPersonModule->defaultListViews);
+        }
+
+        if( isset(\Yii::$app->getModule('person')->params['containerFullWidth']) ){
+            $this->view->params['containerFullWidth'] = \Yii::$app->getModule('person')->params['containerFullWidth'];
+        }
+
         $this->setListViewsParams();
-        $this->setTitleAndBreadcrumbs(Module::t('amosservice', 'Agid Persone'));
-        $this->setDataProvider($this->modelSearch->search(Yii::$app->request->getQueryParams()));
+        $this->setTitleAndBreadcrumbs(Module::t('amosperson', 'Agid Persone'));
+        $this->setDataProvider($this->modelSearch->searchAgidPerson(Yii::$app->request->getQueryParams()));
 
         // rigenerazione del dataProvider per il sort dei campi
 		$this->dataProvider = new ActiveDataProvider([
@@ -133,6 +179,7 @@ class AgidPersonController extends CrudController
 					'updated_by',
 					'updated_at',
 					'status',
+                    'priorita',
 
 					// Related columns
                     'agidPersonType.name' => [
@@ -146,10 +193,33 @@ class AgidPersonController extends CrudController
 
         // set sort order by created_at / id
         $sort = $this->dataProvider->getSort();
-        $sort->defaultOrder = ['id' => SORT_DESC];
+        $sort->defaultOrder = ['priorita' => SORT_ASC, 'name' => SORT_ASC, 'surname' => SORT_ASC /*'id' => SORT_DESC*/];
         $this->dataProvider->setSort($sort);
 
-        return parent::actionIndex('list');
+
+        if (\Yii::$app->user->can('RUBRICA_INTERNA')) {
+
+            if (empty($currentView)) {
+                $currentView = reset($this->agidPersonModule->defaultListViews);
+            }
+            $this->setCurrentView($this->getAvailableView($currentView));
+
+            $this->setUpLayout('list');
+            // $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
+        }
+
+        return $this->render('index',
+            [
+                'dataProvider' => $this->getDataProvider(),
+                'model' => $this->getModelSearch(),
+                'currentView' => $this->getCurrentView(),
+                'availableViews' => $this->getAvailableViews(),
+            ]
+        );
+
+
+
+        // return parent::actionIndex('list');
     }
 
     /**
@@ -281,6 +351,5 @@ class AgidPersonController extends CrudController
         }
         return $this->redirect(['index']);
     }
-
 
 }

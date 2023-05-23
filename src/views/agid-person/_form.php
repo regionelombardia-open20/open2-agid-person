@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -6,7 +7,6 @@
  *
  * @package    @backend/modues/operators/views
  */
-
 use open20\amos\attachments\components\AttachmentsInput;
 use open20\amos\core\forms\AccordionWidget;
 use open20\amos\core\forms\ActiveForm;
@@ -30,6 +30,10 @@ use yii\web\JsExpression;
 use yii\web\View;
 use yii\widgets\ActiveForm as ActiveForm2;
 use open20\amos\attachments\components\CropInput;
+use open20\agid\person\models\AgidPersonProfileType;
+use open20\agid\person\assets\PersonModuleAsset;
+
+$currentAsset = PersonModuleAsset::register($this);
 
 
 $js2 = <<<JS
@@ -61,30 +65,64 @@ $js2 = <<<JS
 JS;
 $this->registerJs($js2);
 
-$url = Url::to(['document-list']);
+$url                     = Url::to(['document-list']);
 /**
  * @var View $this
  * @var AgidPerson $model
  * @var ActiveForm2 $form
  */
-
-
 ?>
 <div class="agid-person-form col-xs-12 nop">
 
-    <?php $form = ActiveForm::begin([
-        'options' => [
-            'id' => 'agid-person_' . ((isset($fid)) ? $fid : 0),
-            'data-fid' => (isset($fid)) ? $fid : 0,
-            'data-field' => ((isset($dataField)) ? $dataField : ''),
-            'data-entity' => ((isset($dataEntity)) ? $dataEntity : ''),
-            'class' => ((isset($class)) ? $class : '')
-        ]
+    <?php
+    $form                    = ActiveForm::begin([
+            'options' => [
+                'id' => 'agid-person_'.((isset($fid)) ? $fid : 0),
+                'data-fid' => (isset($fid)) ? $fid : 0,
+                'data-field' => ((isset($dataField)) ? $dataField : ''),
+                'data-entity' => ((isset($dataEntity)) ? $dataEntity : ''),
+                'class' => ((isset($class)) ? $class : '')
+            ]
     ]);
     ?>
     <?php // $form->errorSummary($model, ['class' => 'alert-danger alert fade in']); ?>
 
-	<div class="row">
+    <div class="row">
+
+        <div class="col-xs-12">
+            <h2 class="subtitle-form">Profilo</h2>
+            <div class="col-md-6 col-xs-12">
+                <?=
+                $form->field($model, 'agid_person_profile_type_id')->widget(Select::className(),
+                    [
+                    'data' => ArrayHelper::map(AgidPersonProfileType::find()->orderBy('name')->all(), 'id', 'name'),
+                    'language' => substr(Yii::$app->language, 0, 2),
+                    'options' => [
+                        'id' => 'agid_person_profile_type_id',
+                        'multiple' => false,
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...'
+                    ]
+                ]);
+                ?>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <?=
+                $form->field($model, 'id_persona')->textInput([
+                    'maxlength' => true,
+                    'readonly' => true,
+                    'value' => 'P'.$model->id
+                ])
+                ?>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <?=
+                $form->field($model, 'priorita')->textInput([
+                    'type' => 'number',
+                ])
+                ?>
+            </div>
+        </div>
+
         <!--nome: corretto-->
         <div class="col-xs-12">
             <h2 class="subtitle-form">Nome</h2>
@@ -104,32 +142,39 @@ $url = Url::to(['document-list']);
                 <?= $form->field($model, 'role')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'agid_person_type_id')->widget(Select::className(), [
+                <?=
+                $form->field($model, 'agid_person_type_id')->widget(Select::className(),
+                    [
                     'data' => ArrayHelper::map(AgidPersonType::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'id' => 'agid_person_type_id',
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...'
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...'
                     ],
                     // 'pluginEvents' => [
                     //     "select2:select" => "enableDisablePP"
                     // ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12"><!-- name string -->
-                <?= $form->field($model, 'agid_person_content_type_id')->widget(Select::className(), [
+                <?=
+                $form->field($model, 'agid_person_content_type_id')->widget(Select::className(),
+                    [
                     'data' => ArrayHelper::map(AgidPersonContentType::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...'
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...'
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?=
-                $form->field($model, 'role_description')->widget(TextEditorWidget::className(), [
+                $form->field($model, 'role_description')->widget(TextEditorWidget::className(),
+                    [
                     'clientOptions' => [
                         'lang' => substr(Yii::$app->language, 0, 2),
                     ],
@@ -144,18 +189,21 @@ $url = Url::to(['document-list']);
 
 
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'manager_org')->widget(Select::classname(), [
+                <?=
+                $form->field($model, 'manager_org')->widget(Select::classname(),
+                    [
                     'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => true,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...',
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
                         'value' => $model->manager_org,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
 
 
@@ -165,86 +213,101 @@ $url = Url::to(['document-list']);
         <!-- TODO START task 5244  -->
         <div class="col-xs-12">
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'agid_organizational_unit_1_id')->widget(Select::classname(), [
+                <?=
+                $form->field($model, 'agid_organizational_unit_1_id')->widget(Select::classname(),
+                    [
                     'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...',
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
                         'value' => $model->agid_organizational_unit_1_id,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?= $form->field($model, 'person_function_1')->textarea(); ?>
             </div>
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'agid_organizational_unit_2_id')->widget(Select::classname(), [
+                <?=
+                $form->field($model, 'agid_organizational_unit_2_id')->widget(Select::classname(),
+                    [
                     'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...',
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
                         'value' => $model->agid_organizational_unit_2_id,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?= $form->field($model, 'person_function_2')->textarea(); ?>
             </div>
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'agid_organizational_unit_3_id')->widget(Select::classname(), [
+                <?=
+                $form->field($model, 'agid_organizational_unit_3_id')->widget(Select::classname(),
+                    [
                     'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...',
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
                         'value' => $model->agid_organizational_unit_3_id,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?= $form->field($model, 'person_function_3')->textarea(); ?>
             </div>
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'agid_organizational_unit_4_id')->widget(Select::classname(), [
+                <?=
+                $form->field($model, 'agid_organizational_unit_4_id')->widget(Select::classname(),
+                    [
                     'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...',
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
                         'value' => $model->agid_organizational_unit_4_id,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?= $form->field($model, 'person_function_4')->textarea(); ?>
             </div>
             <div class="col-md-6 col xs-12">
-                <?= $form->field($model, 'agid_organizational_unit_5_id')->widget(Select::classname(), [
+                <?=
+                $form->field($model, 'agid_organizational_unit_5_id')->widget(Select::classname(),
+                    [
                     'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
                     'language' => substr(Yii::$app->language, 0, 2),
                     'options' => [
                         'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose') . '...',
+                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
                         'value' => $model->agid_organizational_unit_5_id,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
                     ]
-                ]); ?>
+                ]);
+                ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?= $form->field($model, 'person_function_5')->textarea(); ?>
@@ -260,7 +323,8 @@ $url = Url::to(['document-list']);
             <h2 class="subtitle-form">Altre informazioni</h2>
             <div class="col-md-6 col xs-12">
                 <?=
-                $form->field($model, 'skills')->widget(TextEditorWidget::className(), [
+                $form->field($model, 'skills')->widget(TextEditorWidget::className(),
+                    [
                     'clientOptions' => [
                         'lang' => substr(Yii::$app->language, 0, 2),
                     ],
@@ -269,7 +333,8 @@ $url = Url::to(['document-list']);
             </div>
             <div class="col-md-6 col xs-12">
                 <?=
-                $form->field($model, 'delegation')->widget(TextEditorWidget::className(), [
+                $form->field($model, 'delegation')->widget(TextEditorWidget::className(),
+                    [
                     'clientOptions' => [
                         'lang' => substr(Yii::$app->language, 0, 2),
                     ],
@@ -278,41 +343,44 @@ $url = Url::to(['document-list']);
             </div>
 
             <div class="col-md-6 col xs-12">
-                <?php 
-                    // $form->field($model, 'photo')->widget(AttachmentsInput::classname(), [
-                    //     'options' => [
-                    //         'multiple' => false,
-                    //     ],
-                    //     'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
-                    //         'maxFileCount' => 1, // Client max files
-                    //         'showRemove' => true,
-                    //         'indicatorNew' => false,
-                    //         'allowedPreviewTypes' => ['image'],
-                    //         'previewFileIconSettings' => false,
-                    //         'overwriteInitial' => false,
-                    //         'layoutTemplates' => false
-                    //     ]
-                    // ])->label('Foto') 
+                <?php
+                // $form->field($model, 'photo')->widget(AttachmentsInput::classname(), [
+                //     'options' => [
+                //         'multiple' => false,
+                //     ],
+                //     'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
+                //         'maxFileCount' => 1, // Client max files
+                //         'showRemove' => true,
+                //         'indicatorNew' => false,
+                //         'allowedPreviewTypes' => ['image'],
+                //         'previewFileIconSettings' => false,
+                //         'overwriteInitial' => false,
+                //         'layoutTemplates' => false
+                //     ]
+                // ])->label('Foto')
                 ?>
 
-                <?= 
-                    $form->field($model, 'photo')->widget(CropInput::classname(), [
-                        'jcropOptions' => ['aspectRatio' => '1.7']
-                    ])
+                <?=
+                $form->field($model, 'photo')->widget(CropInput::classname(),
+                    [
+                    'jcropOptions' => ['aspectRatio' => '1.7']
+                ])
                 ?>
             </div>
         </div>
         <div class="col-xs-12">
             <div class="col-md-6 col xs-12">
                 <?=
-                $form->field($model, 'date_start_settlement')->widget(DateControl::className(), [
+                $form->field($model, 'date_start_settlement')->widget(DateControl::className(),
+                    [
                     'type' => DateControl::FORMAT_DATE
                 ])
                 ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?=
-                $form->field($model, 'date_end_assignment')->widget(DateControl::className(), [
+                $form->field($model, 'date_end_assignment')->widget(DateControl::className(),
+                    [
                     'type' => DateControl::FORMAT_DATE
                 ])
                 ?>
@@ -321,7 +389,8 @@ $url = Url::to(['document-list']);
         <div class="col-xs-12">
             <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
                 <?=
-                $form->field($model, 'bio')->widget(TextEditorWidget::className(), [
+                $form->field($model, 'bio')->widget(TextEditorWidget::className(),
+                    [
                     'clientOptions' => [
                         'lang' => substr(Yii::$app->language, 0, 2),
                     ],
@@ -330,12 +399,13 @@ $url = Url::to(['document-list']);
             </div>
             <div class="col-md-6 col xs-12">
                 <?=
-                $form->field($model, 'other_info')->widget(TextEditorWidget::className(), [
+                $form->field($model, 'other_info')->widget(TextEditorWidget::className(),
+                    [
                     'clientOptions' => [
                         'lang' => substr(Yii::$app->language, 0, 2),
                     ],
                 ]);
-            ?>
+                ?>
             </div>
         </div>
 
@@ -351,209 +421,270 @@ $url = Url::to(['document-list']);
             </div>
         </div>
 
+        <div class="clearfix"></div>
+
+        <!--contatti:corretto-->      
+        <div class="col-xs-12">
+            <h2 class="person-section-addressbook-subtitle-form subtitle-form">Rubrica interna <span class="am am-lock-outline icon-rounded-danger"></span></h2>
+            <div class="col-xs-12 person-section-addressbook">
+                <div class="row">
+
+                    <div class="col-xs-12">Questi dati saranno visualizzabili solo dal personale autorizzato dal Comune di Ferrara</div>
+                    <div class="col-md-6 col xs-12">
+                        <?=
+                        $form->field($model, 'telephone_internal_use')->textInput([
+                            'maxlength' => '255'])
+                        ?>
+                    </div>
+                    <div class="col-md-6 col xs-12">
+                        <?= $form->field($model, 'cellphone_internal_use')->textInput(['maxlength' => '255']) ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 col xs-12">
+
+                        <?= $form->field($model, 'email_internal_use')->textInput(['maxlength' => '255']) ?>
+
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-6 col xs-12">
+                        <?=
+                        $form->field($model, 'notes_internal_use')->widget(TextEditorWidget::className(),
+                            [
+                            'clientOptions' => [
+                                'lang' => substr(Yii::$app->language, 0, 2),
+                            ],
+                        ]);
+                        ?>
+                    </div>
+                    <div class="col-md-6 col xs-12">
+                        <?=
+                        $form->field($model, 'service_status_internal_use')->widget(TextEditorWidget::className(),
+                            [
+                            'clientOptions' => [
+                                'lang' => substr(Yii::$app->language, 0, 2),
+                            ],
+                        ]);
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
         <!--documenti:corretto-->
         <div class="col-xs-12">
             <h2 class="subtitle-form">Documenti</h2>
             <div class="col-md-6 col xs-12">
                 <?php
-                    $docCvDesc = empty($model->agid_document_cv_id) ? '' : Documenti::findOne($model->agid_document_cv_id)->titolo;
-                    echo $form->field($model, 'agid_document_cv_id')->widget(Select2::classname(), [
-                        'initValueText' => $docCvDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_cv_id) { return agid_document_cv_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_cv_id) { return agid_document_cv_id.text; }'),
+                $docCvDesc               = empty($model->agid_document_cv_id) ? '' : Documenti::findOne($model->agid_document_cv_id)->titolo;
+                echo $form->field($model, 'agid_document_cv_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docCvDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_cv_id) { return agid_document_cv_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_cv_id) { return agid_document_cv_id.text; }'),
+                    ],
+                ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12">
                 <?php
-                    $docNominationDesc = empty($model->agid_document_nomination_id) ? '' : Documenti::findOne($model->agid_document_nomination_id)->titolo;
-                    echo $form->field($model, 'agid_document_nomination_id')->widget(Select2::classname(), [
-                        'initValueText' => $docNominationDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
+                $docNominationDesc       = empty($model->agid_document_nomination_id) ? '' : Documenti::findOne($model->agid_document_nomination_id)->titolo;
+                echo $form->field($model, 'agid_document_nomination_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docNominationDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
-                ?>
-            </div>
-
-			<div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
-                <?php
-
-                    $docImportDesc = empty($model->agid_document_import_id) ? '' : Documenti::findOne($model->agid_document_import_id)->titolo;
-                        echo $form->field($model, 'agid_document_import_id')->widget(Select2::classname(), [
-                        'initValueText' => $docImportDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_import_id) { return agid_document_import_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_import_id) { return agid_document_import_id.text; }'),
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
                         ],
-                    ]);
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
+                    ],
+                ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
                 <?php
-                    $docOtherPostsDesc = empty($model->agid_document_other_posts_id) ? '' : Documenti::findOne($model->agid_document_other_posts_id)->titolo;
-                    echo $form->field($model, 'agid_document_other_posts_id')->widget(Select2::classname(), [
-                        'initValueText' => $docOtherPostsDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
+                $docImportDesc           = empty($model->agid_document_import_id) ? '' : Documenti::findOne($model->agid_document_import_id)->titolo;
+                echo $form->field($model, 'agid_document_import_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docImportDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_import_id) { return agid_document_import_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_import_id) { return agid_document_import_id.text; }'),
+                    ],
+                ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
                 <?php
-                    $docBalanceDesc = empty($model->agid_document_balance_sheet_id) ? '' : Documenti::findOne($model->agid_document_balance_sheet_id)->titolo;
-                    echo $form->field($model, 'agid_document_balance_sheet_id')->widget(Select2::classname(), [
-                        'initValueText' => $docBalanceDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
+                $docOtherPostsDesc       = empty($model->agid_document_other_posts_id) ? '' : Documenti::findOne($model->agid_document_other_posts_id)->titolo;
+                echo $form->field($model, 'agid_document_other_posts_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docOtherPostsDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
+                    ],
+                ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
                 <?php
-                    $docTaxDesc = empty($model->agid_document_tax_return_id) ? '' : Documenti::findOne($model->agid_document_tax_return_id)->titolo;
-                    echo $form->field($model, 'agid_document_tax_return_id')->widget(Select2::classname(), [
-                        'initValueText' => $docTaxDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
+                $docBalanceDesc          = empty($model->agid_document_balance_sheet_id) ? '' : Documenti::findOne($model->agid_document_balance_sheet_id)->titolo;
+                echo $form->field($model, 'agid_document_balance_sheet_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docBalanceDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
+                    ],
+                ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
                 <?php
-                    $docElectionExpensesDesc = empty($model->agid_document_election_expenses_id) ? '' : Documenti::findOne($model->agid_document_election_expenses_id)->titolo;
-                    echo $form->field($model, 'agid_document_election_expenses_id')->widget(Select2::classname(), [
-                        'initValueText' => $docElectionExpensesDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
+                $docTaxDesc              = empty($model->agid_document_tax_return_id) ? '' : Documenti::findOne($model->agid_document_tax_return_id)->titolo;
+                echo $form->field($model, 'agid_document_tax_return_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docTaxDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
+                    ],
+                ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
                 <?php
-                    $docCBalanceDesc = empty($model->agid_document_changes_balance_sheet_id) ? '' : Documenti::findOne($model->agid_document_changes_balance_sheet_id)->titolo;
-                    echo $form->field($model, 'agid_document_changes_balance_sheet_id')->widget(Select2::classname(), [
-                        'initValueText' => $docCBalanceDesc,
-                        'options' => ['multiple'=>false, 'placeholder' => 'Search for a document ...'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'minimumInputLength' => 3,
-                            'language' => [
-                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
-                            ],
-                            'ajax' => [
-                                'url' => $url,
-                                'dataType' => 'json',
-                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                            ],
-                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                            'templateResult' => new JsExpression('function(agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
-                            'templateSelection' => new JsExpression('function (agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
+                $docElectionExpensesDesc = empty($model->agid_document_election_expenses_id) ? '' : Documenti::findOne($model->agid_document_election_expenses_id)->titolo;
+                echo $form->field($model, 'agid_document_election_expenses_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docElectionExpensesDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
                         ],
-                    ]);
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
+                    ],
+                ]);
                 ?>
-			</div>
+            </div>
+
+            <div class="col-md-6 col xs-12 cl-type-person-politica" hidden>
+                <?php
+                $docCBalanceDesc         = empty($model->agid_document_changes_balance_sheet_id) ? '' : Documenti::findOne($model->agid_document_changes_balance_sheet_id)->titolo;
+                echo $form->field($model, 'agid_document_changes_balance_sheet_id')->widget(Select2::classname(),
+                    [
+                    'initValueText' => $docCBalanceDesc,
+                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        ],
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
+                        'templateSelection' => new JsExpression('function (agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
+                    ],
+                ]);
+                ?>
+            </div>
         </div>
 
         <!--tip campi obbligatori-->
@@ -568,72 +699,70 @@ $url = Url::to(['document-list']);
         <div class="row">
             <div class="col-md-12 ">
                 <?php
-                    //Html::tag('h2', \Yii::t('projectcards', '#settings_receiver_title'), ['class' => 'subtitle-form'])
+                //Html::tag('h2', \Yii::t('projectcards', '#settings_receiver_title'), ['class' => 'subtitle-form'])
                 ?>
                 <?= Html::tag('h2', Module::t('amosperson', '#tag'), ['class' => 'subtitle-form']) ?>
                 <?php
+                $moduleCwh               = Yii::$app->getModule('cwh');
 
-                    $moduleCwh = Yii::$app->getModule('cwh');
+                $scope = null;
+                if (!empty($moduleCwh)) {
+                    $scope = $moduleCwh->getCwhScope();
+                }
 
-                    $scope = null;
-                    if (!empty($moduleCwh)) {
-                        $scope = $moduleCwh->getCwhScope();
-                    }
-
-                    echo \open20\amos\cwh\widgets\DestinatariPlusTagWidget::widget([
-                        'model' => $model,
-                        'moduleCwh' => $moduleCwh,
-                        'scope' => $scope
-                    ]);
+                echo \open20\amos\cwh\widgets\DestinatariPlusTagWidget::widget([
+                    'model' => $model,
+                    'moduleCwh' => $moduleCwh,
+                    'scope' => $scope
+                ]);
                 ?>
             </div>
         </div>
 
 
         <div class="row">
-	        <div style="display: none"><?= $form->field($model, 'nomecognome')->textInput(['maxlength' => true]) ?></div>
+            <div style="display: none"><?= $form->field($model, 'nomecognome')->textInput(['maxlength' => true]) ?></div>
 
             <div class="col-xs-12">
                 <?php if (Yii::$app->getModule('seo')) : ?>
                     <?=
-                        AccordionWidget::widget([
-                            'items' => [
-                                [
-                                    'header' => Module::t('amosperson', '#settings_seo_title'),
-                                    'content' => SeoWidget::widget([
-                                        'contentModel' => $model,
-                                    ]),
-                                ]
-                            ],
-                            'headerOptions' => ['tag' => 'h2'],
-                            'options' => Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
-                            'clientOptions' => [
-                                'collapsible' => true,
-                                'active' => 'false',
-                                'icons' => [
-                                    'header' => 'ui-icon-amos am am-plus-square',
-                                    'activeHeader' => 'ui-icon-amos am am-minus-square',
-                                ]
-                            ],
-                        ]);
+                    AccordionWidget::widget([
+                        'items' => [
+                            [
+                                'header' => Module::t('amosperson', '#settings_seo_title'),
+                                'content' => SeoWidget::widget([
+                                    'contentModel' => $model,
+                                ]),
+                            ]
+                        ],
+                        'headerOptions' => ['tag' => 'h2'],
+                        'options' => Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+                        'clientOptions' => [
+                            'collapsible' => true,
+                            'active' => 'false',
+                            'icons' => [
+                                'header' => 'ui-icon-amos am am-plus-square',
+                                'activeHeader' => 'ui-icon-amos am am-minus-square',
+                            ]
+                        ],
+                    ]);
                     ?>
                 <?php endif; ?>
             </div>
         </div>
 
 
-       <!--bottoni finali-->
+        <!--bottoni finali-->
         <div class="col-xs-12">
-        <?=
+            <?=
             WorkflowTransitionButtonsWidget::widget([
                 'form' => $form,
                 'model' => $model,
                 'workflowId' => AgidPerson::AGID_PERSON_WORKFLOW,
                 'viewWidgetOnNewRecord' => true,
-                'closeButton' => Html::a(Module::t('person', 'Annulla'),
-                    $referrer ? $referrer : '/person/agid-person',
+                'closeButton' => Html::a(Module::t('person', 'Annulla'), $referrer ? $referrer : '/person/agid-person',
                     [
-                        'class' => 'btn btn-outline-primary'
+                    'class' => 'btn btn-outline-primary'
                     ]
                 ),
                 'initialStatusName' => "DRAFT",
@@ -641,8 +770,7 @@ $url = Url::to(['document-list']);
                 'draftButtons' => [
                     'default' => [
                         'button' => Html::submitButton(
-                            Module::t('person', 'Salva'),
-                            ['class' => 'btn btn-outline-primary']
+                            Module::t('person', 'Salva'), ['class' => 'btn btn-outline-primary']
                         ),
                     ],
                 ]
@@ -650,7 +778,7 @@ $url = Url::to(['document-list']);
             ?>
 
             <?php ActiveForm::end(); ?>
-		</div>
+        </div>
     </div>
 </div>
 
@@ -659,7 +787,6 @@ $url = Url::to(['document-list']);
 
 
 <?php
-
 $script = <<< JS
 
     $('#agidperson-telephone').keyup(function(){
@@ -700,7 +827,6 @@ $script = <<< JS
 
 JS;
 $this->registerJs($script);
-
 ?>
 
 
