@@ -30,9 +30,9 @@ class AgidPerson extends \open20\agid\person\models\base\AgidPerson
     const AGID_PERSON_STATUS_DRAFT = "AgidPersonWorkflow/DRAFT";
     const AGID_PERSON_STATUS_VALIDATED = "AgidPersonWorkflow/VALIDATED";
 
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

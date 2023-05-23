@@ -10,9 +10,9 @@ use yii\helpers\ArrayHelper;
  */
 class AgidPersonContentType extends \open20\agid\person\models\base\AgidPersonContentType
 {
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

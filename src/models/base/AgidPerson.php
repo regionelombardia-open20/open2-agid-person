@@ -63,13 +63,14 @@ use open20\agid\person\models\AgidPersonProfileType;
  * @property AgidPersonType $agidPersonType
  */
 abstract class AgidPerson extends \open20\amos\core\record\ContentModel implements \open20\amos\seo\interfaces\SeoModelInterface,
-\open20\amos\core\interfaces\ContentModelInterface, \open20\amos\core\interfaces\ViewModelInterface
+    \open20\amos\core\interfaces\ContentModelInterface, \open20\amos\core\interfaces\ViewModelInterface
 {
     public $isSearch = false;
     public $manager_org;
     public $nomecognome;
-    const ROLE_MANAGER='MANAGER';
-    const ROLE_USER='USER';
+
+    const ROLE_MANAGER = 'MANAGER';
+    const ROLE_USER    = 'USER';
 
     public $updated_from;
     public $updated_to;
@@ -90,29 +91,41 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
     public function rules()
     {
         return [
-            [['agid_person_content_type_id', 'agid_person_type_id', 'agid_document_cv_id', 'agid_document_import_id', 'agid_document_other_posts_id', 'agid_document_nomination_id', 'agid_document_balance_sheet_id', 'agid_document_tax_return_id', 'agid_document_election_expenses_id', 'agid_document_changes_balance_sheet_id', 'created_by', 'updated_by', 'deleted_by'], 'integer'],
+            [['agid_person_content_type_id', 'agid_person_type_id', 'agid_document_cv_id', 'agid_document_import_id', 'agid_document_other_posts_id',
+                'agid_document_nomination_id', 'agid_document_balance_sheet_id', 'agid_document_tax_return_id', 'agid_document_election_expenses_id',
+                'agid_document_changes_balance_sheet_id', 'created_by', 'updated_by', 'deleted_by'], 'integer'],
             [['role_description', 'skills', 'delegation', 'bio', 'other_info', 'person_function'], 'string'],
-            [['manager_org','date_end_assignment', 'date_start_settlement', 'created_at', 'updated_at', 'deleted_at','nomecognome'], 'safe'],
+            [['manager_org', 'date_end_assignment', 'date_start_settlement', 'created_at', 'updated_at', 'deleted_at', 'nomecognome'],
+                'safe'],
             [['name', 'surname', 'role', 'email', 'status', 'name_surname'], 'string', 'max' => 255],
             [['email'], 'email'],
-            [['telephone'], 'string',  'max' => 11],
+            [['telephone'], 'string', 'max' => 11],
             //[['telephone'], 'match', 'pattern' => '^[0-9]$'],
-            [['agid_person_content_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonContentType::className(), 'targetAttribute' => ['agid_person_content_type_id' => 'id']],
-            [['agid_person_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonType::className(), 'targetAttribute' => ['agid_person_type_id' => 'id']],
+            [['agid_person_content_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonContentType::className(),
+                'targetAttribute' => ['agid_person_content_type_id' => 'id']],
+            [['agid_person_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonType::className(), 'targetAttribute' => [
+                    'agid_person_type_id' => 'id']],
             [['photo'], 'file'],
-            [['name', 'surname', 'role','agid_person_content_type_id', 'agid_person_type_id'], 'required'],
+            [['name', 'surname', 'role', 'agid_person_content_type_id', 'agid_person_type_id'], 'required'],
             [['person_function_1', 'person_function_2', 'person_function_3', 'person_function_4', 'person_function_5'], 'string'],
-            [['agid_organizational_unit_1_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
-            [['agid_organizational_unit_2_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
-            [['agid_organizational_unit_3_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
-            [['agid_organizational_unit_4_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
-            [['agid_organizational_unit_5_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(), 'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
-            [['agid_organizational_unit_1_id', 'agid_organizational_unit_2_id', 'agid_organizational_unit_3_id', 'agid_organizational_unit_4_id', 'agid_organizational_unit_5_id'], 'integer'],
-            [['agid_person_profile_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonProfileType::className(), 'targetAttribute' => ['agid_person_profile_type_id' => 'id']], 
+            [['agid_organizational_unit_1_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(),
+                'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
+            [['agid_organizational_unit_2_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(),
+                'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
+            [['agid_organizational_unit_3_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(),
+                'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
+            [['agid_organizational_unit_4_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(),
+                'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
+            [['agid_organizational_unit_5_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidOrganizationalUnit::className(),
+                'targetAttribute' => ['agid_organizational_unit_1_id' => 'id']],
+            [['agid_organizational_unit_1_id', 'agid_organizational_unit_2_id', 'agid_organizational_unit_3_id', 'agid_organizational_unit_4_id',
+                'agid_organizational_unit_5_id'], 'integer'],
+            [['agid_person_profile_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AgidPersonProfileType::className(),
+                'targetAttribute' => ['agid_person_profile_type_id' => 'id']],
             [['id_persona', 'telephone_internal_use', 'email_internal_use'], 'string', 'max' => 255],
             [['email_internal_use'], 'email'],
             [['priorita', 'agid_person_profile_type_id'], 'integer'],
-            [['priorita'], 'match' ,'pattern'=> '/^[0-9]+$/u'],
+            [['priorita'], 'match', 'pattern' => '/^[0-9]+$/u'],
             [['agid_person_profile_type_id'], 'required'],
             [['notes_internal_use', 'service_status_internal_use', 'cellphone_internal_use'], 'string'],
             [['fullName'], 'safe']
@@ -178,7 +191,6 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
             'person_function_3' => Module::t('amosperson', '#person_function_3'),
             'person_function_4' => Module::t('amosperson', '#person_function_4'),
             'person_function_5' => Module::t('amosperson', '#person_function_5'),
-
         ];
     }
 
@@ -197,29 +209,35 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
     {
         return $this->hasOne(AgidPersonType::className(), ['id' => 'agid_person_type_id']);
     }
+
     /**
      * @return ActiveQuery
      */
     public function getAgidPersonOrganizationalUnitMmsManager()
     {
-        return $this->hasMany(AgidPersonOrganizationalUnitMm::className(), ['agid_person_id' => 'id']) ->andOnCondition(['role' => self::ROLE_MANAGER])
-                ->andOnCondition(['not' ,['agid_organizational_unit_id' => null]]);
+        return $this->hasMany(AgidPersonOrganizationalUnitMm::className(), ['agid_person_id' => 'id'])->andOnCondition([
+                    'role' => self::ROLE_MANAGER])
+                ->andOnCondition(['not', ['agid_organizational_unit_id' => null]]);
     }
+
     /**
      * @return ActiveQuery
      */
     public function getAgidPersonOrganizationalUnitMmsUser()
     {
-        return $this->hasMany(AgidPersonOrganizationalUnitMm::className(), ['agid_person_id' => 'id']) ->andOnCondition(['role' => self::ROLE_USER])
-            ->andOnCondition(['not' ,['agid_organizational_unit_id' => null]]);
+        return $this->hasMany(AgidPersonOrganizationalUnitMm::className(), ['agid_person_id' => 'id'])->andOnCondition([
+                    'role' => self::ROLE_USER])
+                ->andOnCondition(['not', ['agid_organizational_unit_id' => null]]);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCvDocumento(){
+    public function getCvDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_cv_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_cv_id']);
     }
 
     /**
@@ -227,21 +245,23 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      *
      * @return model | Documenti
      */
-    public function getCvDocumentoValidated(){
+    public function getCvDocumentoValidated()
+    {
 
         return $this->getCvDocumento()
-            ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-            ->andWhere(['deleted_at' => null])
-            ->one();
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
 
-    
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getNominationDocumento(){
+    public function getNominationDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_nomination_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_nomination_id']);
     }
 
     /**
@@ -249,43 +269,47 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      *
      * @return model | Documenti
      */
-    public function getNominationDocumentoValidated(){
+    public function getNominationDocumentoValidated()
+    {
 
-        return $this->getNominationDocumento()           
-            ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-            ->andWhere(['deleted_at' => null])
-            ->one();
+        return $this->getNominationDocumento()
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getImportDocumento(){
+    public function getImportDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_import_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_import_id']);
     }
-
 
     /**
      * Method to get Documenti (agid_document_import_id) for AgidPerson
      *
      * @return model | Documenti
      */
-    public function getImportDocumentoValidated(){
+    public function getImportDocumentoValidated()
+    {
 
         return $this->getImportDocumento()
-                        ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-                        ->andWhere(['deleted_at' => null])
-                        ->one();
-
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOtherPostsDocumento(){
+    public function getOtherPostsDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_other_posts_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_other_posts_id']);
     }
 
     /**
@@ -293,43 +317,47 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      *
      * @return model | Documenti
      */
-    public function getOtherPostsDocumentoValidated(){
+    public function getOtherPostsDocumentoValidated()
+    {
 
         return $this->getOtherPostsDocumento()
                 ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
                 ->andWhere(['deleted_at' => null])
                 ->one();
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getBalanceSheetDocumento(){
+    public function getBalanceSheetDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_balance_sheet_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_balance_sheet_id']);
     }
-
 
     /**
      * Method to get Documenti (agid_document_balance_sheet_id) for AgidPerson
      *
      * @return model | Documenti
      */
-    public function getBalanceSheetDocumentoValidated(){
+    public function getBalanceSheetDocumentoValidated()
+    {
 
         return $this->getBalanceSheetDocumento()
-                        ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-                        ->andWhere(['deleted_at' => null])
-                        ->one();
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
-
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTaxReturnDocumento(){
+    public function getTaxReturnDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_tax_return_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_tax_return_id']);
     }
 
     /**
@@ -337,20 +365,23 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      *
      * @return model | Documenti
      */
-    public function getTaxReturnDocumentoValidated(){
+    public function getTaxReturnDocumentoValidated()
+    {
 
         return $this->getTaxReturnDocumento()
-                    ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-                    ->andWhere(['deleted_at' => null])
-                    ->one();
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getElectionExpensesDocumento(){
+    public function getElectionExpensesDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_election_expenses_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_election_expenses_id']);
     }
 
     /**
@@ -358,56 +389,57 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      *
      * @return model | Documenti
      */
-    public function getElectionExpensesDocumentoValidated(){
+    public function getElectionExpensesDocumentoValidated()
+    {
 
         return $this->getElectionExpensesDocumento()
-                    ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-                    ->andWhere(['deleted_at' => null])
-                    ->one();
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getChangesBalanceSheetDocumento(){
+    public function getChangesBalanceSheetDocumento()
+    {
 
-        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(), ['id' => 'agid_document_changes_balance_sheet_id']);
+        return $this->hasOne(\open20\amos\documenti\models\Documenti::className(),
+                ['id' => 'agid_document_changes_balance_sheet_id']);
     }
-
 
     /**
      * Method to get Documenti (agid_document_changes_balance_sheet_id) for AgidPerson
      *
      * @return model | Documenti
      */
-    public function getChangesBalanceSheetDocumentoValidated(){
+    public function getChangesBalanceSheetDocumentoValidated()
+    {
 
         return $this->getChangesBalanceSheetDocumento()
-            ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
-            ->andWhere(['deleted_at' => null])
-            ->one();
+                ->andWhere(['status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['deleted_at' => null])
+                ->one();
     }
 
-
-    public function getDescription($truncate) 
+    public function getDescription($truncate)
     {
-        $ret = $this->name . " " . $this->surname;
+        $ret = $this->name." ".$this->surname;
         if ($truncate) {
             $ret = $this->__shortText($ret, 200);
         }
         return $ret;
     }
 
-    public function getGridViewColumns() 
+    public function getGridViewColumns()
     {
         return [];
     }
 
     public function getTitle()
     {
-        return $this->name;
-    } 
-
+        return $this->name . ' ' . $this->surname;
+    }
 
     /**
      * Method to get all AgidOrganizzationalUnit with status validated associated to AgidPerson
@@ -417,83 +449,87 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
     public function getAgidOrganizationalUnit()
     {
         return AgidOrganizationalUnit::find()
-                    ->andWhere(
-                        [
-                            'id' => [
-                                    $this->agid_organizational_unit_1_id,
-                                    $this->agid_organizational_unit_2_id,
-                                    $this->agid_organizational_unit_3_id,
-                                    $this->agid_organizational_unit_4_id,
-                                    $this->agid_organizational_unit_5_id
-                            ]
-                        ])
-                    ->andWhere(['status' => AgidOrganizationalUnit::AGID_ORGANIZATIONAL_UNIT_WORKFLOW_STATUS_VALIDATED])
-                    ->andWhere(['deleted_at' => null])
-                    ->all();
-    
+                ->andWhere(
+                    [
+                        'id' => [
+                            $this->agid_organizational_unit_1_id,
+                            $this->agid_organizational_unit_2_id,
+                            $this->agid_organizational_unit_3_id,
+                            $this->agid_organizational_unit_4_id,
+                            $this->agid_organizational_unit_5_id
+                        ]
+                ])
+                ->andWhere(['status' => AgidOrganizationalUnit::AGID_ORGANIZATIONAL_UNIT_WORKFLOW_STATUS_VALIDATED])
+                ->andWhere(['deleted_at' => null])
+                ->all();
     }
-    
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgidOrganizationalUnitRef_1(){
+    public function getAgidOrganizationalUnitRef_1()
+    {
 
         return $this->hasOne(AgidOrganizationalUnit::className(), ['id' => 'agid_organizational_unit_1_id']);
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgidOrganizationalUnitRef_2(){
+    public function getAgidOrganizationalUnitRef_2()
+    {
 
         return $this->hasOne(AgidOrganizationalUnit::className(), ['id' => 'agid_organizational_unit_2_id']);
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgidOrganizationalUnitRef_3(){
+    public function getAgidOrganizationalUnitRef_3()
+    {
 
         return $this->hasOne(AgidOrganizationalUnit::className(), ['id' => 'agid_organizational_unit_3_id']);
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgidOrganizationalUnitRef_4(){
+    public function getAgidOrganizationalUnitRef_4()
+    {
 
         return $this->hasOne(AgidOrganizationalUnit::className(), ['id' => 'agid_organizational_unit_4_id']);
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgidOrganizationalUnitRef_5(){
+    public function getAgidOrganizationalUnitRef_5()
+    {
 
         return $this->hasOne(AgidOrganizationalUnit::className(), ['id' => 'agid_organizational_unit_5_id']);
     }
 
-            
     /**
      * Method to get all workflow status for model
      *
      * @return array
      */
-    public function getAllWorkflowStatus(){
+    public function getAllWorkflowStatus()
+    {
 
         return ArrayHelper::map(
                 ArrayHelper::getColumn(
                     (new \yii\db\Query())->from('sw_status')
-                    ->where(['workflow_id' => $this::AGID_PERSON_WORKFLOW])
-                    ->orderBy(['sort_order' => SORT_ASC])
-                    ->all(),
-
+                        ->where(['workflow_id' => \open20\agid\person\models\AgidPerson::AGID_PERSON_WORKFLOW])
+                        ->orderBy(['sort_order' => SORT_ASC])
+                        ->all(),
                     function ($element) {
-                        $array['status'] = $element['workflow_id'] . "/" . $element['id'];
-                        $array['label'] = $element['label'];
-                        return $array;
-                    }
-                ),
-            'status', 'label');
+                    $array['status'] = $element['workflow_id']."/".$element['id'];
+                    $array['label']  = $element['label'];
+                    return $array;
+                }
+                ), 'status', 'label');
     }
-
 
     /**
      * Method to get all AgidOrganizationalUnit associated with AgidPerson on condition  'role' => self::ROLE_MANAGER
@@ -501,29 +537,25 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      * @param boolean $only_validated
      * @return array | model | AgidOrganizationalUnit
      */
-    public function getAgidPersonOrganizationalUnitsManager($only_validated = true){
+    public function getAgidPersonOrganizationalUnitsManager($only_validated = true)
+    {
 
         $agid_organizational_unit_id = ArrayHelper::getColumn(
-            $this->agidPersonOrganizationalUnitMmsManager,
-
-            function ($element) {
+                $this->agidPersonOrganizationalUnitMmsManager,
+                function ($element) {
                 return $element['agid_organizational_unit_id'];
             }
         );
 
         $agid_organizational_unit = AgidOrganizationalUnit::find()
-                                    ->andWhere([ 'id' => $agid_organizational_unit_id ]);
+            ->andWhere(['id' => $agid_organizational_unit_id]);
 
-        if($only_validated){
+        if ($only_validated) {
             $agid_organizational_unit = $agid_organizational_unit->andWhere(['status' => AgidOrganizationalUnit::AGID_ORGANIZATIONAL_UNIT_WORKFLOW_STATUS_VALIDATED]);
         }
 
-        return $agid_organizational_unit = $agid_organizational_unit->andWhere([ 'deleted_at' => null ])->all();
-
+        return $agid_organizational_unit = $agid_organizational_unit->andWhere(['deleted_at' => null])->all();
     }
-
-
-
 
     /**
      * Method to get all documents related to open20 \ amos \ documents \ models \ DocumentiConcilGroupsMm
@@ -532,31 +564,30 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
      *
      * @return query
      */
-    public function getAgidPersonDocumentiConcilGroups(){
+    public function getAgidPersonDocumentiConcilGroups()
+    {
 
 
         $documenti_ids = ArrayHelper::getColumn(
-            \open20\amos\documenti\models\DocumentiConcilGroupsMm::find()
-                ->andWhere(['agid_organizational_unit_id' => 
-                                (AgidOrganizationalUnit::find()
-                                    ->select('id')
-                                    ->andWhere(
-                                        [
-                                            'id' => [
-                                                $this->agid_organizational_unit_1_id,
-                                                $this->agid_organizational_unit_2_id,
-                                                $this->agid_organizational_unit_3_id,
-                                                $this->agid_organizational_unit_4_id,
-                                                $this->agid_organizational_unit_5_id
-                                            ]
-                                        ])
-                                    ->andWhere(['status' => AgidOrganizationalUnit::AGID_ORGANIZATIONAL_UNIT_WORKFLOW_STATUS_VALIDATED])
-                                    ->andWhere(['deleted_at' => null])
-                                    ->andWhere(['LIKE', 'name', '%' . "grupp" . '%', false]))
-                ])
-                ->all(),
-
-            function ($element){
+                \open20\amos\documenti\models\DocumentiConcilGroupsMm::find()
+                    ->andWhere(['agid_organizational_unit_id' =>
+                        (AgidOrganizationalUnit::find()
+                        ->select('id')
+                        ->andWhere(
+                            [
+                                'id' => [
+                                    $this->agid_organizational_unit_1_id,
+                                    $this->agid_organizational_unit_2_id,
+                                    $this->agid_organizational_unit_3_id,
+                                    $this->agid_organizational_unit_4_id,
+                                    $this->agid_organizational_unit_5_id
+                                ]
+                        ])
+                        ->andWhere(['status' => AgidOrganizationalUnit::AGID_ORGANIZATIONAL_UNIT_WORKFLOW_STATUS_VALIDATED])
+                        ->andWhere(['deleted_at' => null])
+                        ->andWhere(['LIKE', 'name', '%'."grupp".'%', false]))
+                    ])
+                    ->all(), function ($element) {
                 return $element->documenti_id;
             }
         );
@@ -569,21 +600,39 @@ abstract class AgidPerson extends \open20\amos\core\record\ContentModel implemen
                 ->andWhere(['primo_piano' => 1])
                 ->andWhere(['OR',
                     ['data_rimozione' => null],
-                    ['>=', 'data_rimozione',  \Yii::$app->formatter->asDate('now', 'php:Y-m-d')]
+                    ['>=', 'data_rimozione', \Yii::$app->formatter->asDate('now', 'php:Y-m-d')]
                 ])
                 ->orderBy(['data_pubblicazione' => SORT_DESC]);
-        
     }
 
-    
-    public function getFullName() {
-        return $this->surname . ' ' . $this->name;
+    public function getFullName()
+    {
+        return $this->surname.' '.$this->name;
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgidPersonProfileType(){
+    public function getAgidPersonProfileType()
+    {
         return $this->hasOne(AgidPersonProfileType::className(), ['id' => 'agid_person_profile_type_id']);
+    }
+
+    public function getDocumentAdviser()
+    {
+        return $this->hasMany(\open20\amos\documenti\models\Documenti::className(), ['id' => 'documenti_id'])->viaTable('documenti_advisers_mm',
+                    ['agid_person_id' => 'id'],
+                    function($query) {
+                    $query->andWhere(['documenti_advisers_mm.deleted_at' => null]);
+                })
+                ->andWhere(['documenti.in_evidenza' => 1])
+                ->andWhere(['documenti.primo_piano' => 1])
+                ->andWhere(['OR',
+                    ['documenti.data_rimozione' => null],
+                    ['>=', 'documenti.data_rimozione', \Yii::$app->formatter->asDate('now', 'php:Y-m-d')]
+                ])
+                ->andWhere(['<=', 'documenti.data_pubblicazione', \Yii::$app->formatter->asDate('now', 'php:Y-m-d')])
+                ->andWhere(['documenti.status' => \open20\amos\documenti\models\Documenti::DOCUMENTI_WORKFLOW_STATUS_VALIDATO])
+                ->andWhere(['documenti.deleted_at' => null]);
     }
 }

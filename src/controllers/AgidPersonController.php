@@ -16,6 +16,8 @@ use yii\helpers\ArrayHelper;
 use yii\db\Query;
 use open20\amos\core\helpers\Html;
 use open20\agid\person\Module;
+use yii\helpers\Json;
+
 /**
  * Class AgidPersonController 
  * This is the class for controller "AgidPersonController".
@@ -39,6 +41,7 @@ class AgidPersonController extends \open20\agid\person\controllers\base\AgidPers
                         'allow' => true,
                         'actions' => [
                             'document-list',
+                            'organizzazioni-ajax',
                         ],
                         'roles' => ['@']
                     ],
@@ -75,10 +78,10 @@ class AgidPersonController extends \open20\agid\person\controllers\base\AgidPers
             'isGuest' => \Yii::$app->user->isGuest,
             'modelLabel' => 'persone',
             'titleSection' => $titleSection,
-            'subTitleSection' => $subTitleSection,
+            'subTitleSection' => '',
             'urlLinkAll' => $urlLinkAll,
-            'labelLinkAll' => $labelLinkAll,
-            'titleLinkAll' => $titleLinkAll,
+            'labelLinkAll' => '',
+            'titleLinkAll' => '',
             'labelCreate' => $labelCreate,
             'titleCreate' => $titleCreate,
             'urlCreate' => $urlCreate,
@@ -118,8 +121,31 @@ class AgidPersonController extends \open20\agid\person\controllers\base\AgidPers
             $out['results'] = array_values($data);
         }
         elseif ($id > 0) {
-            $out['results'] = ['id' => $id, 'text' => open20\amos\documenti\models\Documenti::find($id)->titolo];
+            $out['results'] = ['id' => $id, 'text' => \open20\amos\documenti\models\Documenti::find($id)->titolo];
         }
         return $out;
+    }
+
+    public function actionOrganizzazioniAjax($q = null, $id = null)
+    {
+        $out = ['more' => false];
+        if (!is_null($q)) {
+            $query = new Query();
+            $query->select('id, name AS text')
+                ->from(\open20\agid\organizationalunit\models\AgidOrganizationalUnit::tableName())
+                ->where('name LIKE :search', ['search' => "%".$q."%"])
+                ->andWhere(['status' => 'AgidOrganizationalUnitWorkflow/VALIDATED'])
+                ->andWhere(['deleted_at' => null])
+                ->limit(50);
+
+            $command        = $query->createCommand();
+            $data           = $command->queryAll();
+            $out['results'] = array_values($data);
+        } elseif ($id > 0) {
+            $out['results'] = ['id' => $id, 'text' => \open20\agid\organizationalunit\models\AgidOrganizationalUnit::findOne($id)->name];
+        } else {
+            $out['results'] = ['id' => 0, 'text' => \Yii::t('amosnews', 'Nessun risultato trovato')];
+        }
+        return Json::encode($out);
     }
 }

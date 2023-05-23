@@ -13,9 +13,9 @@ class AgidPersonType extends \open20\agid\person\models\base\AgidPersonType
     const POLITIC = 1;
     const ADMINISTRATIVE = 2;
     
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

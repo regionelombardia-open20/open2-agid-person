@@ -10,9 +10,9 @@ use yii\helpers\ArrayHelper;
  */
 class AgidPersonProfileType extends \open20\agid\person\models\base\AgidPersonProfileType
 {
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

@@ -35,7 +35,6 @@ use open20\agid\person\assets\PersonModuleAsset;
 
 $currentAsset = PersonModuleAsset::register($this);
 
-
 $js2 = <<<JS
 	var prettyUrlCal = $('#agidperson-nomecognome');
 	var name=$("#agidperson-name");
@@ -95,13 +94,13 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_person_profile_type_id')->widget(Select::className(),
                     [
-                    'data' => ArrayHelper::map(AgidPersonProfileType::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'id' => 'agid_person_profile_type_id',
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...'
-                    ]
+                        'data' => ArrayHelper::map(AgidPersonProfileType::find()->orderBy('name')->all(), 'id', 'name'),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_person_profile_type_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('amosperson', '#select_choose').'...'
+                        ]
                 ]);
                 ?>
             </div>
@@ -145,13 +144,13 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_person_type_id')->widget(Select::className(),
                     [
-                    'data' => ArrayHelper::map(AgidPersonType::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'id' => 'agid_person_type_id',
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...'
-                    ],
+                        'data' => ArrayHelper::map(AgidPersonType::find()->orderBy('name')->all(), 'id', 'name'),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_person_type_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('amosperson', '#select_choose').'...'
+                        ],
                     // 'pluginEvents' => [
                     //     "select2:select" => "enableDisablePP"
                     // ]
@@ -162,12 +161,12 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_person_content_type_id')->widget(Select::className(),
                     [
-                    'data' => ArrayHelper::map(AgidPersonContentType::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...'
-                    ]
+                        'data' => ArrayHelper::map(AgidPersonContentType::find()->orderBy('name')->all(), 'id', 'name'),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'multiple' => false,
+                            'placeholder' => Module::t('amosperson', '#select_choose').'...'
+                        ]
                 ]);
                 ?>
             </div>
@@ -175,9 +174,9 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'role_description')->widget(TextEditorWidget::className(),
                     [
-                    'clientOptions' => [
-                        'lang' => substr(Yii::$app->language, 0, 2),
-                    ],
+                        'clientOptions' => [
+                            'lang' => substr(Yii::$app->language, 0, 2),
+                        ],
                 ]);
                 ?>
             </div>
@@ -192,16 +191,27 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'manager_org')->widget(Select::classname(),
                     [
-                    'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => true,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
-                        'value' => $model->manager_org,
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ]
+                        'data' => (empty($model->manager_org) ? [] : ArrayHelper::map(AgidOrganizationalUnit::find()->andWhere([
+                                    'id' => $model->manager_org])->asArray()->all(), 'id', 'name')),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'manager_org_id',
+                            'multiple' => true,
+                            'placeholder' => Module::t('person', 'Seleziona').' ...',
+                            'value' => $model->manager_org,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'ajax' => [
+                                'url' => '/person/agid-person/organizzazioni-ajax',
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(global) { return global.text; }'),
+                            'templateSelection' => new JsExpression('function (global) { return global.text; }'),
+                        ]
                 ]);
                 ?>
             </div>
@@ -216,16 +226,27 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_organizational_unit_1_id')->widget(Select::classname(),
                     [
-                    'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
-                        'value' => $model->agid_organizational_unit_1_id,
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ]
+                          'data' => (empty($model->agid_organizational_unit_1_id) ? [] : ArrayHelper::map(AgidOrganizationalUnit::find()->andWhere([
+                                    'id' => $model->agid_organizational_unit_1_id])->asArray()->all(), 'id', 'name')),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_organizational_unit_1_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('person', 'Seleziona').' ...',
+                            'value' => $model->agid_organizational_unit_1_id,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'ajax' => [
+                                'url' => '/person/agid-person/organizzazioni-ajax',
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(global) { return global.text; }'),
+                            'templateSelection' => new JsExpression('function (global) { return global.text; }'),
+                        ]
                 ]);
                 ?>
             </div>
@@ -236,16 +257,27 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_organizational_unit_2_id')->widget(Select::classname(),
                     [
-                    'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
-                        'value' => $model->agid_organizational_unit_2_id,
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ]
+                        'data' => (empty($model->agid_organizational_unit_2_id) ? [] : ArrayHelper::map(AgidOrganizationalUnit::find()->andWhere([
+                                    'id' => $model->agid_organizational_unit_2_id])->asArray()->all(), 'id', 'name')),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_organizational_unit_2_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('person', 'Seleziona').' ...',
+                            'value' => $model->agid_organizational_unit_2_id,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'ajax' => [
+                                'url' => '/person/agid-person/organizzazioni-ajax',
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(global) { return global.text; }'),
+                            'templateSelection' => new JsExpression('function (global) { return global.text; }'),
+                        ]
                 ]);
                 ?>
             </div>
@@ -256,16 +288,27 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_organizational_unit_3_id')->widget(Select::classname(),
                     [
-                    'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
-                        'value' => $model->agid_organizational_unit_3_id,
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ]
+                       'data' => (empty($model->agid_organizational_unit_3_id) ? [] : ArrayHelper::map(AgidOrganizationalUnit::find()->andWhere([
+                                    'id' => $model->agid_organizational_unit_3_id])->asArray()->all(), 'id', 'name')),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_organizational_unit_3_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('person', 'Seleziona').' ...',
+                            'value' => $model->agid_organizational_unit_3_id,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'ajax' => [
+                                'url' => '/person/agid-person/organizzazioni-ajax',
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(global) { return global.text; }'),
+                            'templateSelection' => new JsExpression('function (global) { return global.text; }'),
+                        ]
                 ]);
                 ?>
             </div>
@@ -276,16 +319,27 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_organizational_unit_4_id')->widget(Select::classname(),
                     [
-                    'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
-                        'value' => $model->agid_organizational_unit_4_id,
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ]
+                         'data' => (empty($model->agid_organizational_unit_4_id) ? [] : ArrayHelper::map(AgidOrganizationalUnit::find()->andWhere([
+                                    'id' => $model->agid_organizational_unit_4_id])->asArray()->all(), 'id', 'name')),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_organizational_unit_4_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('person', 'Seleziona').' ...',
+                            'value' => $model->agid_organizational_unit_4_id,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'ajax' => [
+                                'url' => '/person/agid-person/organizzazioni-ajax',
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(global) { return global.text; }'),
+                            'templateSelection' => new JsExpression('function (global) { return global.text; }'),
+                        ]
                 ]);
                 ?>
             </div>
@@ -296,16 +350,27 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'agid_organizational_unit_5_id')->widget(Select::classname(),
                     [
-                    'data' => ArrayHelper::map(AgidOrganizationalUnit::find()->orderBy('name')->all(), 'id', 'name'),
-                    'language' => substr(Yii::$app->language, 0, 2),
-                    'options' => [
-                        'multiple' => false,
-                        'placeholder' => Module::t('amosperson', '#select_choose').'...',
-                        'value' => $model->agid_organizational_unit_5_id,
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ]
+                         'data' => (empty($model->agid_organizational_unit_5_id) ? [] : ArrayHelper::map(AgidOrganizationalUnit::find()->andWhere([
+                                    'id' => $model->agid_organizational_unit_5_id])->asArray()->all(), 'id', 'name')),
+                        'language' => substr(Yii::$app->language, 0, 2),
+                        'options' => [
+                            'id' => 'agid_organizational_unit_5_id',
+                            'multiple' => false,
+                            'placeholder' => Module::t('person', 'Seleziona').' ...',
+                            'value' => $model->agid_organizational_unit_5_id,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'ajax' => [
+                                'url' => '/person/agid-person/organizzazioni-ajax',
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(global) { return global.text; }'),
+                            'templateSelection' => new JsExpression('function (global) { return global.text; }'),
+                        ]
                 ]);
                 ?>
             </div>
@@ -325,9 +390,9 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'skills')->widget(TextEditorWidget::className(),
                     [
-                    'clientOptions' => [
-                        'lang' => substr(Yii::$app->language, 0, 2),
-                    ],
+                        'clientOptions' => [
+                            'lang' => substr(Yii::$app->language, 0, 2),
+                        ],
                 ]);
                 ?>
             </div>
@@ -335,36 +400,36 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'delegation')->widget(TextEditorWidget::className(),
                     [
-                    'clientOptions' => [
-                        'lang' => substr(Yii::$app->language, 0, 2),
-                    ],
+                        'clientOptions' => [
+                            'lang' => substr(Yii::$app->language, 0, 2),
+                        ],
                 ]);
                 ?>
             </div>
 
             <div class="col-md-6 col xs-12">
                 <?php
-                // $form->field($model, 'photo')->widget(AttachmentsInput::classname(), [
-                //     'options' => [
-                //         'multiple' => false,
-                //     ],
-                //     'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
-                //         'maxFileCount' => 1, // Client max files
-                //         'showRemove' => true,
-                //         'indicatorNew' => false,
-                //         'allowedPreviewTypes' => ['image'],
-                //         'previewFileIconSettings' => false,
-                //         'overwriteInitial' => false,
-                //         'layoutTemplates' => false
-                //     ]
-                // ])->label('Foto')
+// $form->field($model, 'photo')->widget(AttachmentsInput::classname(), [
+//     'options' => [
+//         'multiple' => false,
+//     ],
+//     'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
+//         'maxFileCount' => 1, // Client max files
+//         'showRemove' => true,
+//         'indicatorNew' => false,
+//         'allowedPreviewTypes' => ['image'],
+//         'previewFileIconSettings' => false,
+//         'overwriteInitial' => false,
+//         'layoutTemplates' => false
+//     ]
+// ])->label('Foto')
                 ?>
 
                 <?=
                 $form->field($model, 'photo')->widget(CropInput::classname(),
                     [
-                    'jcropOptions' => ['aspectRatio' => '1.7']
-                ])
+                        'jcropOptions' => ['aspectRatio' => '1.7']
+                    ])
                 ?>
             </div>
         </div>
@@ -373,16 +438,16 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'date_start_settlement')->widget(DateControl::className(),
                     [
-                    'type' => DateControl::FORMAT_DATE
-                ])
+                        'type' => DateControl::FORMAT_DATE
+                    ])
                 ?>
             </div>
             <div class="col-md-6 col xs-12">
                 <?=
                 $form->field($model, 'date_end_assignment')->widget(DateControl::className(),
                     [
-                    'type' => DateControl::FORMAT_DATE
-                ])
+                        'type' => DateControl::FORMAT_DATE
+                    ])
                 ?>
             </div>
         </div>
@@ -391,9 +456,9 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'bio')->widget(TextEditorWidget::className(),
                     [
-                    'clientOptions' => [
-                        'lang' => substr(Yii::$app->language, 0, 2),
-                    ],
+                        'clientOptions' => [
+                            'lang' => substr(Yii::$app->language, 0, 2),
+                        ],
                 ]);
                 ?>
             </div>
@@ -401,9 +466,9 @@ $url                     = Url::to(['document-list']);
                 <?=
                 $form->field($model, 'other_info')->widget(TextEditorWidget::className(),
                     [
-                    'clientOptions' => [
-                        'lang' => substr(Yii::$app->language, 0, 2),
-                    ],
+                        'clientOptions' => [
+                            'lang' => substr(Yii::$app->language, 0, 2),
+                        ],
                 ]);
                 ?>
             </div>
@@ -453,9 +518,9 @@ $url                     = Url::to(['document-list']);
                         <?=
                         $form->field($model, 'notes_internal_use')->widget(TextEditorWidget::className(),
                             [
-                            'clientOptions' => [
-                                'lang' => substr(Yii::$app->language, 0, 2),
-                            ],
+                                'clientOptions' => [
+                                    'lang' => substr(Yii::$app->language, 0, 2),
+                                ],
                         ]);
                         ?>
                     </div>
@@ -463,9 +528,9 @@ $url                     = Url::to(['document-list']);
                         <?=
                         $form->field($model, 'service_status_internal_use')->widget(TextEditorWidget::className(),
                             [
-                            'clientOptions' => [
-                                'lang' => substr(Yii::$app->language, 0, 2),
-                            ],
+                                'clientOptions' => [
+                                    'lang' => substr(Yii::$app->language, 0, 2),
+                                ],
                         ]);
                         ?>
                     </div>
@@ -483,23 +548,23 @@ $url                     = Url::to(['document-list']);
                 $docCvDesc               = empty($model->agid_document_cv_id) ? '' : Documenti::findOne($model->agid_document_cv_id)->titolo;
                 echo $form->field($model, 'agid_document_cv_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docCvDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docCvDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_cv_id) { return agid_document_cv_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_cv_id) { return agid_document_cv_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_cv_id) { return agid_document_cv_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_cv_id) { return agid_document_cv_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -509,23 +574,23 @@ $url                     = Url::to(['document-list']);
                 $docNominationDesc       = empty($model->agid_document_nomination_id) ? '' : Documenti::findOne($model->agid_document_nomination_id)->titolo;
                 echo $form->field($model, 'agid_document_nomination_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docNominationDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docNominationDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_nomination_id) { return agid_document_nomination_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -535,23 +600,23 @@ $url                     = Url::to(['document-list']);
                 $docImportDesc           = empty($model->agid_document_import_id) ? '' : Documenti::findOne($model->agid_document_import_id)->titolo;
                 echo $form->field($model, 'agid_document_import_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docImportDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docImportDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_import_id) { return agid_document_import_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_import_id) { return agid_document_import_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_import_id) { return agid_document_import_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_import_id) { return agid_document_import_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -561,23 +626,23 @@ $url                     = Url::to(['document-list']);
                 $docOtherPostsDesc       = empty($model->agid_document_other_posts_id) ? '' : Documenti::findOne($model->agid_document_other_posts_id)->titolo;
                 echo $form->field($model, 'agid_document_other_posts_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docOtherPostsDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docOtherPostsDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_other_posts_id) { return agid_document_other_posts_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -587,23 +652,23 @@ $url                     = Url::to(['document-list']);
                 $docBalanceDesc          = empty($model->agid_document_balance_sheet_id) ? '' : Documenti::findOne($model->agid_document_balance_sheet_id)->titolo;
                 echo $form->field($model, 'agid_document_balance_sheet_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docBalanceDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docBalanceDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_balance_sheet_id) { return agid_document_balance_sheet_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -613,23 +678,23 @@ $url                     = Url::to(['document-list']);
                 $docTaxDesc              = empty($model->agid_document_tax_return_id) ? '' : Documenti::findOne($model->agid_document_tax_return_id)->titolo;
                 echo $form->field($model, 'agid_document_tax_return_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docTaxDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docTaxDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_tax_return_id) { return agid_document_tax_return_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -639,23 +704,23 @@ $url                     = Url::to(['document-list']);
                 $docElectionExpensesDesc = empty($model->agid_document_election_expenses_id) ? '' : Documenti::findOne($model->agid_document_election_expenses_id)->titolo;
                 echo $form->field($model, 'agid_document_election_expenses_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docElectionExpensesDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docElectionExpensesDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_election_expenses_id) { return agid_document_election_expenses_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -665,23 +730,23 @@ $url                     = Url::to(['document-list']);
                 $docCBalanceDesc         = empty($model->agid_document_changes_balance_sheet_id) ? '' : Documenti::findOne($model->agid_document_changes_balance_sheet_id)->titolo;
                 echo $form->field($model, 'agid_document_changes_balance_sheet_id')->widget(Select2::classname(),
                     [
-                    'initValueText' => $docCBalanceDesc,
-                    'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                        'initValueText' => $docCBalanceDesc,
+                        'options' => ['multiple' => false, 'placeholder' => 'Search for a document ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 3,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return 'error'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => $url,
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
+                            'templateSelection' => new JsExpression('function (agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
                         ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        'templateResult' => new JsExpression('function(agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
-                        'templateSelection' => new JsExpression('function (agid_document_changes_balance_sheet_id) { return agid_document_changes_balance_sheet_id.text; }'),
-                    ],
                 ]);
                 ?>
             </div>
@@ -699,7 +764,7 @@ $url                     = Url::to(['document-list']);
         <div class="row">
             <div class="col-md-12 ">
                 <?php
-                //Html::tag('h2', \Yii::t('projectcards', '#settings_receiver_title'), ['class' => 'subtitle-form'])
+//Html::tag('h2', \Yii::t('projectcards', '#settings_receiver_title'), ['class' => 'subtitle-form'])
                 ?>
                 <?= Html::tag('h2', Module::t('amosperson', '#tag'), ['class' => 'subtitle-form']) ?>
                 <?php
@@ -736,7 +801,7 @@ $url                     = Url::to(['document-list']);
                             ]
                         ],
                         'headerOptions' => ['tag' => 'h2'],
-                        'options' => Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+                        'options' => Yii::$app->user->can('SEO_USER') ? [] : ['style' => 'display:none;'],
                         'clientOptions' => [
                             'collapsible' => true,
                             'active' => 'false',
@@ -762,7 +827,7 @@ $url                     = Url::to(['document-list']);
                 'viewWidgetOnNewRecord' => true,
                 'closeButton' => Html::a(Module::t('person', 'Annulla'), $referrer ? $referrer : '/person/agid-person',
                     [
-                    'class' => 'btn btn-outline-primary'
+                        'class' => 'btn btn-outline-primary'
                     ]
                 ),
                 'initialStatusName' => "DRAFT",
@@ -827,7 +892,7 @@ $script = <<< JS
 
 JS;
 $this->registerJs($script);
-?>
+
 
 
 
